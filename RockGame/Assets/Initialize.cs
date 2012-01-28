@@ -7,20 +7,25 @@ public class Initialize : MonoBehaviour {
 	void Awake()
 	{
 		//first
-		startingPosition = transform.position;
+//		startingPosition = transform.position;
 		
 		
 	}
 	
 	
 	public Vector3 cameraOffset = new Vector3( 10.0f, 5.0f, -10.0f );
+	public float angleDown = 5.0f;
 	
 	private GameObject rock;
-	private Vector3 startingPosition;
+//	private Vector3 startingPosition;
 	// Use this for initialization
 	void Start () {
 		//second
 		rock = GameObject.FindGameObjectWithTag("Rock");
+		
+		transform.position = transform.position + cameraOffset;
+//		transform.rotation.SetLookRotation( rock.transform.position
+		transform.Rotate(angleDown, 0.0f, 0.0f);
 	}
 	
 	// Update is called once per frame

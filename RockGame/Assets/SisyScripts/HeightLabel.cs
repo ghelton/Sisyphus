@@ -3,7 +3,7 @@ using System.Collections;
 
 public class HeightLabel : MonoBehaviour {
 	public GUIText heightGuiText;
-	private string baseText;
+	private string baseText = "Height: ";
 	public Transform rock;
 	// Use this for initialization
 	void Start () 

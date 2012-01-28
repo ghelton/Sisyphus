@@ -8,7 +8,8 @@ public class RockController : MonoBehaviour {
 	public ParticleEmitter sissyPhystStayParticle = null;
 	public ParticleEmitter groundCollideParticle = null;
 	
-	public AudioClip collideSound = null;
+	public AudioClip collideSound 	= null;
+	public AudioClip rollSound 		= null;
 	
 	
 	public Vector3 baseUpperCut = new Vector3(0.0f, 500.0f);
@@ -23,6 +24,8 @@ public class RockController : MonoBehaviour {
 	void Start () {
 		if( sissyPhyst == null )
 			sissyPhyst = GameObject.FindGameObjectWithTag("SisyPhyst");
+		
+		HIGHEST_HEIGHT = 0;
 	}
 	
 	// Update is called once per frame
@@ -39,7 +42,7 @@ public class RockController : MonoBehaviour {
 			HIGHEST_HEIGHT = (int)transform.position.y;
 	}
 	
-	void OnTriggerEnter(Collision collider)
+	void OnTriggerEnter(Collider collider)
 	{
 		if( collider.gameObject.CompareTag("Cliff") )
 		{
@@ -57,6 +60,8 @@ public class RockController : MonoBehaviour {
 		{
 			case "Ground":
 					particles = groundCollideParticle;
+					audio.Play();
+//					audio.enabled = true;
 				break;
 				
 			case "SisyPhyst":
@@ -65,12 +70,23 @@ public class RockController : MonoBehaviour {
 			
 		}
 		
+		if( collider.gameObject.CompareTag("Ground") )
+			particles = groundCollideParticle;
+		
 		if( particles != null )
 		{
+			Debug.Log("Drawing particles " + particles.name);
 			Vector3 contactPoint = collider.contacts[0].point;
-			Quaternion contactDirection = Quaternion.LookRotation( contactPoint - collider.gameObject.transform.position );
+			
+			Quaternion contactDirection = Quaternion.LookRotation( collider.contacts[0].normal );
 			
 			ParticleEmitter.Instantiate( particles, contactPoint, contactDirection );
 		}
+	}
+	
+	void OnCollisionExit( Collision collider )
+	{
+		if( collider.gameObject.CompareTag("Ground") )
+			audio.Stop();
 	}
 }

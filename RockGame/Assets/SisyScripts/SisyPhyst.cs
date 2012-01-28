@@ -79,12 +79,12 @@ public class SisyPhyst : MonoBehaviour {
 		
 		if( Input.GetKeyDown( KeyCode.DownArrow ) )
 		{
-			pumpMass( 20.0f, 0.27f );
+			pumpMass( 3.0f, 1.87f );
 		}
-		else if( Input.GetKeyUp( KeyCode.DownArrow ) )
-		{
-			rigidbody.mass /= 20.0f;
-		}
+//		else if( Input.GetKeyUp( KeyCode.DownArrow ) )
+//		{
+//			rigidbody.mass /= 20.0f;
+//		}
 		else if( Input.GetKey( KeyCode.DownArrow ) )
 			rigidbody.AddForce( downForce, ForceMode.Force );
 		else
@@ -94,14 +94,19 @@ public class SisyPhyst : MonoBehaviour {
 				pumpMass( 1.1f, 0.4f );
 				rigidbody.AddForce( dashForce * (rock.transform.position - transform.position), ForceMode.Impulse );
 			}
+			else if( Input.GetKey( KeyCode.F ) )
+			{
+				rigidbody.AddForce( (rock.transform.position - transform.position), ForceMode.Force );
+			}
 			else if( Input.GetKeyDown(KeyCode.RightArrow) )
 			{
-				pumpMass( 1.4f, 0.2f );
-				rigidbody.AddForce( punchForce, ForceMode.Impulse );
+				rigidbody.AddForce( punchForce * (rigidbody.mass / baseMass), ForceMode.Impulse );
+				pumpMass( 3.4f, 0.2f );
 			}
-			else if( Input.GetKeyDown( KeyCode.UpArrow ) )
+			else if( (Time.time > jumpTime) && Input.GetKeyDown( KeyCode.UpArrow ) )
 			{
-				pumpMass( 1.6f, 0.6f );
+				jumpTime = Time.time + 0.47f;
+				pumpMass( 75.0f, 0.26f );
 				rigidbody.AddForce( uppercutForce, ForceMode.Impulse );
 			}
 			else
@@ -111,9 +116,14 @@ public class SisyPhyst : MonoBehaviour {
 				{
 					toRock *= walkForceMult;
 				}
-				else{
+				else if( onGround ){
 					toRock.Normalize();
-					toRock *= rigidbody.mass * 10.0f;
+					toRock *= (rigidbody.mass + rock.rigidbody.mass);
+				}
+				else
+				{
+					toRock.Normalize();
+					toRock *= walkForceMult;
 				}
 				
 				rigidbody.AddForce( toRock, ForceMode.Force );
@@ -133,6 +143,21 @@ public class SisyPhyst : MonoBehaviour {
 	{
 			Destroy(this); //kill our duder
 			rigidbody.constraints = RigidbodyConstraints.None;
+	}
+	
+	private bool onGround = false;
+	
+	void OnCollisionEnter(Collision collision)
+	{
+		if( collision.gameObject.CompareTag("Ground") )
+			onGround = true;
+	}
+	
+	
+	void OnCollisionExit(Collision collision)
+	{
+		if( collision.gameObject.CompareTag("Ground") )
+			onGround = false;
 	}
 	
 	private float lastMassAdjust = 1.0f;
