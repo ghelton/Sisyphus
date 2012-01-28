@@ -76,6 +76,11 @@ public class SisyPhyst : MonoBehaviour {
 		{
 			rigidbody.AddForce(-1.0f * (overrun * overrun), -1.0f * overrun, 0.0f, ForceMode.Force);
 		}
+		
+		if( Input.GetKey( KeyCode.F ) )
+		{
+			rigidbody.AddForce( (rock.transform.position - transform.position), ForceMode.Force );
+		}
 	}
 	
 	
@@ -96,11 +101,7 @@ public class SisyPhyst : MonoBehaviour {
 			{
 				pumpMass( 1.1f, 0.4f );
 				rigidbody.AddForce( dashForce * (rock.transform.position - transform.position), ForceMode.Impulse );
-			}
-			else if( Input.GetKey( KeyCode.F ) )
-			{
-				rigidbody.AddForce( (rock.transform.position - transform.position), ForceMode.Force );
-			}
+			} 
 			else if( Input.GetKeyDown(KeyCode.RightArrow) )
 			{
 				rigidbody.AddForce( punchForce * (rigidbody.mass / baseMass), ForceMode.Impulse );
