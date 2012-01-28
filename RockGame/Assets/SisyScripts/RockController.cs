@@ -4,6 +4,7 @@ using System.Collections;
 public class RockController : MonoBehaviour {
 	public static int HIGHEST_HEIGHT = 0;
 	
+	
 	public ParticleEmitter sissyPhystCollideParticle = null;
 	public ParticleEmitter sissyPhystStayParticle = null;
 	public ParticleEmitter groundCollideParticle = null;
@@ -52,6 +53,7 @@ public class RockController : MonoBehaviour {
 		}
 	}
 	
+#if !UNITY_IPHONE
 	void OnCollisionEnter( Collision collider )
 	{
 		
@@ -95,4 +97,5 @@ public class RockController : MonoBehaviour {
 		if( collider.gameObject.CompareTag("Ground") )
 			audio.Stop();
 	}
+#endif
 }

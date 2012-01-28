@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 
 public class HeightLabel : MonoBehaviour {
+	
+	public bool highScore = false;
 	public GUIText heightGuiText;
 	private string baseText = "Height: ";
 	public Transform rock;
@@ -23,9 +25,10 @@ public class HeightLabel : MonoBehaviour {
 	private string lastHeightString;
 	// Update is called once per frame
 	void Update () {
-		int newHeight = Mathf.RoundToInt( rock.position.y );
+		int newHeight = Mathf.Max(Mathf.RoundToInt( rock.position.y ), RockController.HIGHEST_HEIGHT);
 		if( newHeight != lastHeight )
 		{
+			heightGuiText.fontStyle = (newHeight > RockController.HIGHEST_HEIGHT) ? FontStyle.BoldAndItalic : FontStyle.Normal;
 			heightGuiText.text = baseText + newHeight.ToString();
 		}
 	}
