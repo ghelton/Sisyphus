@@ -15,7 +15,7 @@ public class SisyPhyst : MonoBehaviour {
 	public float dashForce		= 1500.0f;
 	
 	private float baseMass 		= 100.0f;
-	private float massOffset	= 1.0f;
+//	private float massOffset	= 1.0f;
 	
 	private float massTime		= 0.0f;
 	private float massDuration	= 0.0f;

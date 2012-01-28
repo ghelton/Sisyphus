@@ -46,6 +46,8 @@
   <ItemGroup>
      <Compile Include="Assets\Constants.cs" />
      <Compile Include="Assets\Initialize.cs" />
+     <Compile Include="Assets\SisyScripts\HeightLabel.cs" />
+     <Compile Include="Assets\SisyScripts\LoseGUI.cs" />
      <Compile Include="Assets\SisyScripts\RockController.cs" />
      <Compile Include="Assets\SisyScripts\SisyPhyst.cs" />
      <None Include="Assets\Standard Assets\Image Effects (Pro Only)\_Sources\Shaders\_BloomAndFlares\BlendOneOne.shader" />

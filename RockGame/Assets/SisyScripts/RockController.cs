@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 
 public class RockController : MonoBehaviour {
+	public static int HIGHEST_HEIGHT = 0;
+	
 	public ParticleEmitter sissyPhystCollideParticle = null;
 	public ParticleEmitter sissyPhystStayParticle = null;
 	public ParticleEmitter groundCollideParticle = null;
@@ -32,6 +34,9 @@ public class RockController : MonoBehaviour {
 				rigidbody.AddForceAtPosition( baseUpperCut, sissyPhyst.rigidbody.position, ForceMode.Impulse );
 			
 		}
+		
+		if( (int)transform.position.y > HIGHEST_HEIGHT )
+			HIGHEST_HEIGHT = (int)transform.position.y;
 	}
 	
 	void OnTriggerEnter(Collision collider)
@@ -39,24 +44,33 @@ public class RockController : MonoBehaviour {
 		if( collider.gameObject.CompareTag("Cliff") )
 		{
 			sissyPhyst.GetComponent<SisyPhyst>().Kill();
+			Time.timeScale = 0.1f;
+			Camera.mainCamera.gameObject.AddComponent<LoseGUI>();
 		}
 	}
 	
 	void OnCollisionEnter( Collision collider )
 	{
-		Vector3 contactPoint = collider.contacts[0];
-		Quaternion contactDirection = Quaternion.LookRotation( contactPoint - collider.gameObject.transform.position );
+		
+		ParticleEmitter particles = null;
 		switch( collider.gameObject.tag )
 		{
-		case "Ground":
-				if( groundCollideParticle != null )
-					GameObject.Instantiate( groundCollideParticle, contactPoint, contactDirection );
-			break;
-			
-		case "SisyPhyst":
+			case "Ground":
+					particles = groundCollideParticle;
+				break;
 				
-			break;
+			case "SisyPhyst":
+					particles = sissyPhystCollideParticle;
+				break;
 			
+		}
+		
+		if( particles != null )
+		{
+			Vector3 contactPoint = collider.contacts[0].point;
+			Quaternion contactDirection = Quaternion.LookRotation( contactPoint - collider.gameObject.transform.position );
+			
+			ParticleEmitter.Instantiate( particles, contactPoint, contactDirection );
 		}
 	}
 }
