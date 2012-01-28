@@ -8,8 +8,12 @@ public class Initialize : MonoBehaviour {
 	{
 		//first
 		startingPosition = transform.position;
+		
+		
 	}
 	
+	
+	public Vector3 cameraOffset = new Vector3( 10.0f, 5.0f, -10.0f );
 	
 	private GameObject rock;
 	private Vector3 startingPosition;
@@ -24,18 +28,19 @@ public class Initialize : MonoBehaviour {
 		
 		//third
 		
+		transform.position = rock.transform.position - cameraOffset;
 		
-		float distance = Vector3.Distance(transform.position, rock.transform.position);
-		if( distance > 15.0f )
-		{
-			Vector3 targetPosition = Vector3.Slerp(transform.position
-			                                       , Vector3.MoveTowards(rock.transform.position, startingPosition, 15.0f)
-			                                       , 0.1f);
-				
-			gameObject.transform.position = targetPosition;
-		}
+//		float distance = Vector3.Distance(transform.position, rock.transform.position);
+//		if( distance > 15.0f )
+//		{
+//			Vector3 targetPosition = Vector3.Slerp(transform.position
+//			                                       , Vector3.MoveTowards(rock.transform.position, startingPosition, 15.0f)
+//			                                       , 0.1f);
+//				
+//			gameObject.transform.position = targetPosition;
+//		}
 		
-		transform.LookAt(rock.transform.position);
+//		transform.LookAt(rock.transform.position);
 //		GameObject.
 //		
 //		foreach( GameObject gameObj in GameObject.FindObjectsWithTag(typeof(GameObject)))
