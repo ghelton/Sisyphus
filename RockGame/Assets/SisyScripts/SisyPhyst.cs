@@ -83,10 +83,12 @@ public class SisyPhyst : MonoBehaviour {
 	{	
 		toRock = Vector3.zero;
 		
+		bool onLeft = transform.position.x < rock.transform.position.x;
+		
 		
 		if( Input.GetKeyDown( KeyCode.DownArrow ) )
 		{
-			pumpMass( 3.0f, 1.87f );
+			pumpMass( 5.0f, 1.87f );
 		}
 		else
 		{
@@ -115,7 +117,10 @@ public class SisyPhyst : MonoBehaviour {
 				toRock = rock.rigidbody.position - rigidbody.position;
 				if( toRock.magnitude > braceDistance )
 				{
-					toRock *= walkForceMult;
+					if( onLeft )
+						toRock *= walkForceMult;
+					else
+						toRock = (Vector3.up + Vector3.right) * toRock.sqrMagnitude;
 				}
 				else if( onGround ){
 					toRock.Normalize();
@@ -132,9 +137,10 @@ public class SisyPhyst : MonoBehaviour {
 		float massOffset = rigidbody.mass / baseMass;
 		if( lastMassAdjust != massOffset )
 		{
+			lastMassAdjust = massOffset;
+			massOffset = Mathf.Sqrt(massOffset);
 			light.intensity = lightIntensity * massOffset;
 			light.range = lightRange * massOffset;
-			lastMassAdjust = massOffset;
 		}
 	}
 	
