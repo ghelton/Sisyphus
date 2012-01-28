@@ -26,6 +26,11 @@ public class Initialize : MonoBehaviour {
 		transform.position = transform.position + cameraOffset;
 //		transform.rotation.SetLookRotation( rock.transform.position
 		transform.Rotate(angleDown, 0.0f, 0.0f);
+		
+#if UNITY_IPHONE
+	GameObject joystick = GameObject.FindGameObjectWithTag("Control");
+	joystick.active = true;
+#endif
 	}
 	
 	// Update is called once per frame

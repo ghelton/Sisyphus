@@ -78,10 +78,16 @@ public class RockController : MonoBehaviour {
 			Debug.Log("Drawing particles " + particles.name);
 			Vector3 contactPoint = collider.contacts[0].point;
 			
-			Quaternion contactDirection = Quaternion.LookRotation( collider.contacts[0].normal );
+			Quaternion contactDirection = Quaternion.Euler( collider.contacts[0].normal );
 			
 			ParticleEmitter.Instantiate( particles, contactPoint, contactDirection );
 		}
+	}
+	
+	void OnCollisionStay( Collision collision )
+	{
+		if( collision.gameObject.Equals(sissyPhyst) )// sissyPhystStayParticle != null )
+			ParticleEmitter.Instantiate(sissyPhystStayParticle, collision.contacts[0].point, Quaternion.identity);
 	}
 	
 	void OnCollisionExit( Collision collider )
