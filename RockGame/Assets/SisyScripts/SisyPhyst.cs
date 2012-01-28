@@ -47,15 +47,11 @@ public class SisyPhyst : MonoBehaviour {
 		}
 	}
 	
+	private Vector3 toRock;
 	private float jumpTime = 0.0f;
 	// Update is called once per frame
-	void Update () {
-//		if( Time.time > jumpTime )
-//		{
-//			rigidbody.AddForce(0.0f, 0.5f, 0.0f, ForceMode.Impulse);
-//			jumpTime += 2.0f;
-//		}
-		
+	void FixedUpdate()
+	{
 		float massTimeLeft = massTime - Time.time;
 		if( massTimeLeft > 0.0f )
 		{
@@ -68,25 +64,30 @@ public class SisyPhyst : MonoBehaviour {
 			massDuration = 0.0f;
 		}
 		
+		if( Input.GetKey( KeyCode.DownArrow ) )
+			rigidbody.AddForce( downForce, ForceMode.Force );
+		
+		if( toRock != Vector3.zero )
+			rigidbody.AddForce( toRock, ForceMode.Force );
+		
+		
 		float overrun = rigidbody.transform.position.x - rock.rigidbody.transform.position.x;
-		if( overrun > 0.0f )
+		if( overrun > 0.0f && rigidbody.velocity.magnitude < 10.0f )
 		{
-			Vector3 adjustedVelocity = rigidbody.velocity;
-			adjustedVelocity.x -= Mathf.Sqrt(overrun);
-			
-			rigidbody.velocity = adjustedVelocity;
+			rigidbody.AddForce(-1.0f * (overrun * overrun), -1.0f * overrun, 0.0f, ForceMode.Force);
 		}
+	}
+	
+	
+	void Update () 
+	{	
+		toRock = Vector3.zero;
+		
 		
 		if( Input.GetKeyDown( KeyCode.DownArrow ) )
 		{
 			pumpMass( 3.0f, 1.87f );
 		}
-//		else if( Input.GetKeyUp( KeyCode.DownArrow ) )
-//		{
-//			rigidbody.mass /= 20.0f;
-//		}
-		else if( Input.GetKey( KeyCode.DownArrow ) )
-			rigidbody.AddForce( downForce, ForceMode.Force );
 		else
 		{
 			if( Input.GetKeyDown( KeyCode.F ) )
@@ -111,7 +112,7 @@ public class SisyPhyst : MonoBehaviour {
 			}
 			else
 			{
-				Vector3 toRock = rock.rigidbody.position - rigidbody.position;
+				toRock = rock.rigidbody.position - rigidbody.position;
 				if( toRock.magnitude > braceDistance )
 				{
 					toRock *= walkForceMult;
@@ -125,8 +126,6 @@ public class SisyPhyst : MonoBehaviour {
 					toRock.Normalize();
 					toRock *= walkForceMult;
 				}
-				
-				rigidbody.AddForce( toRock, ForceMode.Force );
 			}
 		}
 		
