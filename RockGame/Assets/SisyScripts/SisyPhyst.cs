@@ -83,7 +83,8 @@ public class SisyPhyst : MonoBehaviour {
 		}
 	}
 	
-	
+	public float jumpForce = 1.5f;
+	public float leftForce = 3.25f;
 	void Update () 
 	{	
 		toRock = Vector3.zero;
@@ -104,7 +105,7 @@ public class SisyPhyst : MonoBehaviour {
 			} 
 			else if( Input.GetKeyDown(KeyCode.RightArrow) )
 			{
-				rigidbody.AddForce( punchForce * (rigidbody.mass / baseMass), ForceMode.Impulse );
+				rigidbody.AddForce( punchForce * Mathf.Sqrt(rigidbody.mass / baseMass), ForceMode.Impulse );
 				pumpMass( 3.4f, 0.2f );
 			}
 			else if( (Time.time > jumpTime) && Input.GetKeyDown( KeyCode.UpArrow ) )
@@ -116,14 +117,24 @@ public class SisyPhyst : MonoBehaviour {
 			else
 			{
 				toRock = rock.rigidbody.position - rigidbody.position;
-				if( toRock.magnitude > braceDistance )
+				Debug.Log("ToRock " + toRock);
+				if( toRock.magnitude < braceDistance )
 				{
-					if( onLeft )
-						toRock *= walkForceMult;
-					else
-						toRock = (Vector3.up + Vector3.right) * toRock.sqrMagnitude;
+					if( toRock.x > 0.0f )
+					{
+						pumpMass(1.005f, 0.07f);
+						toRock *= (rigidbody.mass);
+					}
+					else if(rigidbody.velocity.x < 0.0f)
+					{
+						if( toRock.y > -1.25f  )
+							toRock = (Vector3.up * rigidbody.mass * jumpForce) * walkForceMult;
+						
+						toRock += Vector3.left * rigidbody.mass * leftForce;
+					}
 				}
-				else if( onGround ){
+				else if( onGround )
+				{
 					toRock.Normalize();
 					toRock *= (rigidbody.mass + rock.rigidbody.mass);
 				}
