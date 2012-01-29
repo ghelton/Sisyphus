@@ -8,6 +8,8 @@ public class SisyPhyst : MonoBehaviour {
 	public const int DOWN = 0, LEFT = 1, UP = 2, RIGHT = 3;
 	
 	public GameObject run;
+	public GameObject magnet;
+	public GameObject down;
 	public GameObject[] punches;
 	public GameObject[] upperCut;
 	
@@ -62,7 +64,7 @@ public class SisyPhyst : MonoBehaviour {
 		levelThresholds[STAT_SPEED] 	= speedLevels;
 		levelThresholds[STAT_STRENGTH] 	= strengthLevels;
 		
-		
+		uppercutForce.y *= 0.325f;
 		int count;
 		for( count = statLevels.Length - 1; count >= 0; count-- )
 			statLevels[count] = 1;
@@ -74,6 +76,28 @@ public class SisyPhyst : MonoBehaviour {
 	public Vector3[] directionVelocities;
 	
 //	private rockPosition;
+	
+	private void playAnimation( GameObject animation )
+	{
+		if( animation != null )
+		{
+			Debug.Log("Playing animation " + animation);
+			lastAnimation.active = false;
+			lastAnimation = animation;
+			lastAnimation.active = true;
+		}
+		else
+			Debug.Log("Attempting to play null animation");
+	}
+	
+	
+	private GameObject lastAnimation = null;
+	private void playAnimation( GameObject[] animations )
+	{
+		int animationKey = Random.Range(0, animations.Length );
+		
+		playAnimation( animations[animationKey] );
+	}
 	
 	private void statAction( int action, int direction, bool discrete )
 	{
@@ -87,20 +111,49 @@ public class SisyPhyst : MonoBehaviour {
 		
 		bool leftOfRock = Vector3.Distance(peakTransform.position, rockPosition) < Vector3.Distance( peakTransform.position, transform.position );
 		bool belowRock = toRock.y > -1.0f;
-		Debug.Log("StatAction left " + leftOfRock.ToString() + " below rock: " + belowRock.ToString());
+//		Debug.Log("StatAction left " + leftOfRock.ToString() + " below rock: " + belowRock.ToString());
+		
+		if( action == STAT_STRENGTH ) //strength
+		{
+			switch( direction )
+			{
+			case UP:
+				if( discrete ) {
+					rigidbody.AddForce( desiredIntensity * uppercutForce, ForceMode.Impulse );
+					playAnimation( upperCut );
+				}
+				break;
+				
+			case RIGHT:
+				if( !leftOfRock )
+				{
+					action = STAT_SPEED;
+					direction = LEFT;
+				}
+				else if( discrete )
+				{
+					rigidbody.AddForce( punchForce * desiredIntensity, ForceMode.Impulse );
+					playAnimation( punches );
+				}
+				
+				break;
+				
+			}
+		}
 		
 		if( action == STAT_SPEED )
 		{
-		 Debug.Log("Go Left");	
 			if( direction == LEFT )
 			{
 				if( discrete ) 
-				{
+				{	
 //					pumpMass( pumpBy, 0.27f );
 					Vector3 theForce =  dashForce * desiredIntensity * toRock;
 					if( belowRock && !leftOfRock )
 						theForce = theForce + (Vector3.up * 15.0f);
 					rigidbody.AddForce(theForce, ForceMode.Impulse );
+					
+					playAnimation( magnet );
 				}
 				else
 				{
@@ -109,11 +162,15 @@ public class SisyPhyst : MonoBehaviour {
 			}
 			else if( direction == DOWN )
 			{	
-				Vector3 thisDownForce = downForce * desiredIntensity;
-				if( leftOfRock )
-					rigidbody.AddForce( thisDownForce, ForceMode.Impulse );
-				else
-					rigidbody.AddForce( thisDownForce.x * -0.5f, thisDownForce.y, thisDownForce.z, ForceMode.Impulse );
+				if( discrete )
+				{
+					Vector3 thisDownForce = downForce * desiredIntensity;
+					if( leftOfRock )
+						rigidbody.AddForce( thisDownForce, ForceMode.Impulse );
+					else
+						rigidbody.AddForce( thisDownForce.x * -0.5f, thisDownForce.y, thisDownForce.z, ForceMode.Impulse );
+					playAnimation( down );
+				}
 			}
 			else if( direction == -1 )
 			{
@@ -144,22 +201,6 @@ public class SisyPhyst : MonoBehaviour {
 				}
 				
 				rigidbody.AddForce( toRock, discrete ? ForceMode.Impulse : ForceMode.Force );
-			}
-		}
-		else //strength
-		{
-			switch( direction )
-			{
-			case UP:
-				if( discrete )
-					rigidbody.AddForce( desiredIntensity * uppercutForce, ForceMode.Impulse );
-				break;
-				
-			case RIGHT:
-				if( discrete )
-					rigidbody.AddForce( punchForce * desiredIntensity, ForceMode.Impulse );
-				break;
-				
 			}
 		}
 		
@@ -222,6 +263,7 @@ public class SisyPhyst : MonoBehaviour {
 		for( int count = upperCut.Length - 1; count >= 0; count-- )
 			upperCut[count].active = false;
 		
+		lastAnimation = run;
 		
 		projectedMass = rigidbody.mass;
 		
@@ -337,8 +379,8 @@ public class SisyPhyst : MonoBehaviour {
 			}
 			else if( (Time.time > jumpTime) && GetButtonDown( UP ) )//( KeyCode.UpArrow ) )
 			{
-				jumpTime = Time.time + 0.47f;
-				pumpMass( 15.0f, 0.26f );
+				jumpTime = Time.time + 0.87f;
+				pumpMass( 1.2f, 0.26f );
 				statAction( STAT_STRENGTH, UP, true );
 			}
 		}
@@ -366,18 +408,26 @@ public class SisyPhyst : MonoBehaviour {
     {
         if( collision.gameObject.CompareTag("Rock") )
         {    
-            onGround = true;
 			jumpsLeft = statLevels[STAT_SPEED];
             audio.Play();
         }
+		else if( collision.gameObject.CompareTag("Ground") )
+		{
+            onGround = true;
+			playAnimation( run );
+		}
         //
     }
 	
 	
 	void OnCollisionExit(Collision collision)
 	{
-		if( collision.gameObject.CompareTag("Rock") )
+//		if( collision.gameObject.CompareTag("Rock") )
+		if( collision.gameObject.CompareTag("Ground") ) 
+		{
 			onGround = false;
+//			playAnimation( up );
+		}
 	}
 	
 	private float lastMassAdjust = 1.0f;
