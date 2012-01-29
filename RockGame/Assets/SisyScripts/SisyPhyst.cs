@@ -151,6 +151,8 @@ public class SisyPhyst : MonoBehaviour {
 	
 	private GameObject ground;
 	void Start () {
+		projectedMass = rigidbody.mass;
+		
 		theDude = GameObject.FindGameObjectWithTag("Avatar");
 		if( theDude == null )
 			theDude = transform.GetChild(0).gameObject;
@@ -163,9 +165,11 @@ public class SisyPhyst : MonoBehaviour {
 			rock = GameObject.FindGameObjectWithTag("Rock");
 	}
 	
+	private float projectedMass;
 	private void pumpMass( float amount, float time )
 	{
 		rigidbody.mass *= amount;
+//		projectedMass *= amount;
 		
 		if( massTime < Time.time )
 		{
@@ -269,7 +273,7 @@ public class SisyPhyst : MonoBehaviour {
 			else if( (Time.time > jumpTime) && GetButtonDown( UP ) )//( KeyCode.UpArrow ) )
 			{
 				jumpTime = Time.time + 0.47f;
-				pumpMass( 250.0f, 0.26f );
+				pumpMass( 15.0f, 0.26f );
 				rigidbody.AddForce( uppercutForce, ForceMode.Impulse );
 			}
 			else
@@ -305,6 +309,7 @@ public class SisyPhyst : MonoBehaviour {
 		}
 		
 		float massOffset = rigidbody.mass / baseMass;
+//		float massOffset = projectedMass / baseMass;
 		if( lastMassAdjust != massOffset )
 		{
 			lastMassAdjust = massOffset;
