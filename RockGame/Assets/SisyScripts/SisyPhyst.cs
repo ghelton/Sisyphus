@@ -68,7 +68,7 @@ public class SisyPhyst : MonoBehaviour {
 	public GameObject peak;
 	public Vector3[] directionVelocities;
 	
-	private void statAction( int action, float pumpBy )
+	private void statAction( int action, int direction, bool discrete )
 	{
 		int actionLevel = statLevels[action];
 		float desiredIntensity = Mathf.Pow(statEffect[action], actionLevel - 1) * (rigidbody.mass / baseMass);
@@ -77,39 +77,94 @@ public class SisyPhyst : MonoBehaviour {
 		Vector3 toRock = rockPosition - transform.position;
 		
 		bool leftOfRock = Vector3.Distance(peakTransform.position, rockPosition) < Vector3.Distance( peakTransform.position, transform.position );
-		bool belowRock = toRock.y > 0.0f;
+		bool belowRock = toRock.y > -1.0f;
 		Debug.Log("StatAction left " + leftOfRock.ToString() + " below rock: " + belowRock.ToString());
 		
 		if( action == STAT_SPEED )
 		{
 		 Debug.Log("Go Left");	
-//			if( !leftOfRock ) 
-//			{
-				pumpMass( pumpBy, 0.1f );
-				Vector3 theForce =  dashForce * desiredIntensity * toRock;
-				if( belowRock && !leftOfRock )
-					theForce = theForce + (Vector3.up * desiredIntensity);
-				rigidbody.AddForce(theForce, ForceMode.Impulse );
-//			}
+			if( direction == LEFT )
+			{
+				if( discrete ) 
+				{
+//					pumpMass( pumpBy, 0.27f );
+					Vector3 theForce =  dashForce * desiredIntensity * toRock;
+					if( belowRock && !leftOfRock )
+						theForce = theForce + (Vector3.up * 15.0f);
+					rigidbody.AddForce(theForce, ForceMode.Impulse );
+				}
+				else
+				{
+					rigidbody.AddForce( toRock * desiredIntensity, ForceMode.Force );
+				}
+			}
+			else if( direction == DOWN )
+			{	
+				Vector3 thisDownForce = downForce * desiredIntensity;
+				if( leftOfRock )
+					rigidbody.AddForce( thisDownForce, ForceMode.Impulse );
+				else
+					rigidbody.AddForce( thisDownForce.x * -0.5f, thisDownForce.y, thisDownForce.z, ForceMode.Impulse );
+			}
+			else if( direction == -1 && !discrete )
+			{
+				if( toRock.magnitude < braceDistance )
+				{
+					if( leftOfRock )
+					{
+						pumpMass(1.005f, 0.07f);
+						toRock *= desiredIntensity;
+					}
+					else if(rigidbody.velocity.x < 0.0f)
+					{
+						if( belowRock  )
+							toRock = (Vector3.up * rigidbody.mass * jumpForce);
+						
+						toRock += Vector3.left * rigidbody.mass * leftForce;
+					}
+				}
+				else if( !onGround )
+				{
+					toRock.Normalize();
+					toRock *= (rigidbody.mass + rock.rigidbody.mass);
+				}
+				else
+				{
+					toRock.Normalize();
+					toRock *= walkForceMult;
+				}
+				
+				rigidbody.AddForce( toRock, ForceMode.Force );
+			}
 		}
-		else
+		else //strength
 		{
-			
+			switch( direction )
+			{
+			case UP:
+				if( discrete )
+					rigidbody.AddForce( desiredIntensity * uppercutForce, ForceMode.Impulse );
+				break;
+				
+			case RIGHT:
+				if( discrete )
+					rigidbody.AddForce( punchForce * desiredIntensity, ForceMode.Impulse );
+				break;
+				
+			}
 		}
 		
-//		Vector3 velocity = directionVelocities[direction];
 		
-//		if( left )
-//			velocity.x *= -1.0f;
+		if( direction != -1 )
+			stats[action] += levelRate[action];
+		else
+			stats[action] += (levelRate[action] * Time.deltaTime);
 		
-		
-//		stats[action] *= levelRate[action];
-		
-//		float[] statLevelThresholds = levelThresholds[action];
-//		if( statLevelThresholds.Length < actionLevel && stats[action] > statLevelThresholds[actionLevel] )
-//		{ //levelup
-//			statLevels[action]++;
-//		}
+		float[] statLevelThresholds = levelThresholds[action];
+		if( statLevelThresholds.Length < actionLevel && stats[action] > statLevelThresholds[actionLevel] )
+		{ //levelup
+			statLevels[action]++;
+		}
 	}
 	
 	private bool GetButton( int direction )
@@ -208,27 +263,35 @@ public class SisyPhyst : MonoBehaviour {
 		if( toRock != Vector3.zero ) {
 			rigidbody.AddForce( toRock, ForceMode.Force );
 			
-			if( (toRock.x > 0.0f) != facingRight )
+			if( (toRock.x >= 0.0f) != facingRight )
 			{
 //				Debug.Log("Flipping dude");
-				iTween.ScaleBy(theDude, new Vector3(-1.0f, 1.0f, 1.0f), 0.47f);
-//				iTween.RotateAdd(theDude, new Vector3(180.0f, 0.0f), 0.37f);
 				facingRight = !facingRight;
+				Vector3 dudeScale = theDude.transform.localScale;
+				dudeScale.x *= -1.0f;
+				
+				iTween.ScaleTo(theDude, dudeScale, 0.47f);
 			}
 		}
 		
 		
 		
 		float overrun = rigidbody.transform.position.x - rock.rigidbody.transform.position.x;
+//		if( Mathf.Abs(overrun) > 50.0f ) //warp
+//			rigidbody.transform.position = Vector3.MoveTowards( rigidbody.transform.position, rock.transform.position, 3.0f );
+		
+		
 		if( overrun > 0.0f && rigidbody.velocity.magnitude < 10.0f )
 		{
 			rigidbody.AddForce(-1.0f * (overrun * overrun), -1.0f * overrun, 0.0f, ForceMode.Force);
 		}
 		
-//		if( GetButton( LEFT ) )//Input.GetKey( KeyCode.LeftArrow ) )
-//		{
-//			rigidbody.AddForce( (rock.transform.position - transform.position), ForceMode.Force );
-//		}
+		if( GetButton( LEFT ) )//Input.GetKey( KeyCode.LeftArrow ) )
+		{
+			statAction( STAT_SPEED, LEFT, false );
+		}
+		else
+			statAction(STAT_SPEED, -1, false);
 	}
 	
 	public float jumpForce = 1.5f;
@@ -237,74 +300,29 @@ public class SisyPhyst : MonoBehaviour {
 	{	
 		toRock = Vector3.zero;
 		
-//		bool onLeft = transform.position.x < rock.transform.position.x;
-		
-		
-//		if( GetButtonDown( LEFT ) )
-//		{
-//			statAction( STAT_SPEED, 1.0f );
-//		}
-//		else if( GetButtonDown( RIGHT ) )
-//		{
-//			
-//		}
-		
 		if( GetButtonDown( DOWN ) )//( KeyCode.DownArrow ) )
 		{
 			pumpMass( 1.1f, 0.27f );
-			if( rigidbody.velocity.x >= 0.0f )
-				rigidbody.AddForce( downForce, ForceMode.Impulse );
-			else
-				rigidbody.AddForce( downForce.x * -0.25f, downForce.y, downForce.z, ForceMode.Impulse );
+			statAction( STAT_SPEED, DOWN, true );
 		}
 		else
 		{
 			if( GetButtonDown( LEFT ) )//Input.GetKeyDown( KeyCode.LeftArrow ) )
 			{
-//				pumpMass( 8.1f, 0.4f );
-				statAction( STAT_SPEED, 8.1f );
+				pumpMass( 8.1f, 0.27f );
+				statAction( STAT_SPEED, LEFT, true );
 //				rigidbody.AddForce( dashForce * (rock.transform.position - transform.position), ForceMode.Impulse );
 			} 
 			else if( GetButtonDown( RIGHT ) )//Input.GetKeyDown(KeyCode.RightArrow) )
 			{
-				rigidbody.AddForce( punchForce * Mathf.Sqrt(rigidbody.mass / baseMass), ForceMode.Impulse );
 				pumpMass( 3.4f, 0.2f );
+				statAction( STAT_STRENGTH, RIGHT, true );
 			}
 			else if( (Time.time > jumpTime) && GetButtonDown( UP ) )//( KeyCode.UpArrow ) )
 			{
 				jumpTime = Time.time + 0.47f;
 				pumpMass( 15.0f, 0.26f );
-				rigidbody.AddForce( uppercutForce, ForceMode.Impulse );
-			}
-			else
-			{
-				toRock = rock.transform.position - transform.position;
-//				Debug.Log("ToRock " + toRock);
-				if( toRock.magnitude < braceDistance )
-				{
-					if( toRock.x > 0.0f )
-					{
-						pumpMass(1.005f, 0.07f);
-						toRock *= (rigidbody.mass);
-					}
-					else if(rigidbody.velocity.x < 0.0f)
-					{
-						if( toRock.y > -1.25f  )
-							toRock = (Vector3.up * rigidbody.mass * jumpForce) * walkForceMult;
-						
-						toRock += Vector3.left * rigidbody.mass * leftForce;
-					}
-				}
-				else if( onGround )
-				{
-					toRock.Normalize();
-					toRock *= (rigidbody.mass + rock.rigidbody.mass);
-				}
-				else
-				{
-					toRock.Normalize();
-					toRock *= walkForceMult;
-				}
+				statAction( STAT_STRENGTH, UP, true );
 			}
 		}
 		
