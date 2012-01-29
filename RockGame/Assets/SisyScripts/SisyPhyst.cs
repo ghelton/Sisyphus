@@ -215,6 +215,14 @@ public class SisyPhyst : MonoBehaviour {
 	
 	private GameObject ground;
 	void Start () {
+		
+		for( int count = punches.Length - 1; count >= 0; count-- )
+			punches[count].active = false;
+		
+		for( int count = upperCut.Length - 1; count >= 0; count-- )
+			upperCut[count].active = false;
+		
+		
 		projectedMass = rigidbody.mass;
 		
 		theDude = GameObject.FindGameObjectWithTag("Avatar");
