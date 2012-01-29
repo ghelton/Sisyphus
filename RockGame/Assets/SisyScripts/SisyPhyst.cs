@@ -6,6 +6,11 @@ public class SisyPhyst : MonoBehaviour {
 	private Transform peakTransform;
 	
 	public const int DOWN = 0, LEFT = 1, UP = 2, RIGHT = 3;
+	
+	public GameObject run;
+	public GameObject[] punches;
+	public GameObject[] upperCut;
+	
 	public static bool[] directions = {false, false, false, false};
 	private static bool[] directionsDown = {false, false, false, false};
 //	private static float[] cooldownTime = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -68,6 +73,8 @@ public class SisyPhyst : MonoBehaviour {
 	public GameObject peak;
 	public Vector3[] directionVelocities;
 	
+//	private rockPosition;
+	
 	private void statAction( int action, int direction, bool discrete )
 	{
 		int actionLevel = statLevels[action];
@@ -75,6 +82,8 @@ public class SisyPhyst : MonoBehaviour {
 		
 		Vector3 rockPosition = rock.transform.position;
 		Vector3 toRock = rockPosition - transform.position;
+		float rockDistance = toRock.magnitude;
+		toRock.Normalize();
 		
 		bool leftOfRock = Vector3.Distance(peakTransform.position, rockPosition) < Vector3.Distance( peakTransform.position, transform.position );
 		bool belowRock = toRock.y > -1.0f;
@@ -106,9 +115,9 @@ public class SisyPhyst : MonoBehaviour {
 				else
 					rigidbody.AddForce( thisDownForce.x * -0.5f, thisDownForce.y, thisDownForce.z, ForceMode.Impulse );
 			}
-			else if( direction == -1 && !discrete )
+			else if( direction == -1 )
 			{
-				if( toRock.magnitude < braceDistance )
+				if( rockDistance < braceDistance )
 				{
 					if( leftOfRock )
 					{
@@ -134,7 +143,7 @@ public class SisyPhyst : MonoBehaviour {
 					toRock *= walkForceMult;
 				}
 				
-				rigidbody.AddForce( toRock, ForceMode.Force );
+				rigidbody.AddForce( toRock, discrete ? ForceMode.Impulse : ForceMode.Force );
 			}
 		}
 		else //strength

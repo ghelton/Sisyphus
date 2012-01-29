@@ -57,10 +57,6 @@ public class RockController : MonoBehaviour {
 	{
 		
 		
-		if( collider.gameObject.CompareTag("Ground") )
-					audio.Play();
-		
-		
 #if !UNITY_IPHONE && !UNITY_ANDROID
 		
 		ParticleEmitter particles = null;
@@ -68,11 +64,12 @@ public class RockController : MonoBehaviour {
 		{
 			case "Ground":
 					particles = groundCollideParticle;
-//					audio.enabled = true;
 				break;
 				
 			case "SisyPhyst":
 					particles = sissyPhystCollideParticle;
+					audio.enabled = true;
+					audio.Play();
 				break;
 			
 		}
