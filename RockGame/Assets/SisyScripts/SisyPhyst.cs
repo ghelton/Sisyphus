@@ -3,14 +3,14 @@ using System.Collections;
 
 public class SisyPhyst : MonoBehaviour {
 	public GameObject rock;
+	private Transform peakTransform;
 	
-	public const int DOWN = 0, UP = 1, LEFT = 2, RIGHT = 3;
+	public const int DOWN = 0, LEFT = 1, UP = 2, RIGHT = 3;
 	public static bool[] directions = {false, false, false, false};
 	private static bool[] directionsDown = {false, false, false, false};
 //	private static float[] cooldownTime = {0.0f, 0.0f, 0.0f, 0.0f};
-	private static KeyCode[] keycodes = {KeyCode.DownArrow, KeyCode.UpArrow, KeyCode.LeftArrow, KeyCode.RightArrow};
-//	public Vector3 basePunch	= new Vector3( 50.0f, 100.0f);
-//	KeyCode.
+	private static KeyCode[] keycodes = {KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.UpArrow, KeyCode.RightArrow};
+	
 	
 	public Vector3 downForce 		= new Vector3( 50.0f, -15.0f  );
 	public Vector3 punchForce 		= new Vector3(750.0f, 15.0f   );
@@ -27,6 +27,86 @@ public class SisyPhyst : MonoBehaviour {
 	private float massDuration	= 0.0f;
 	
 	
+	public float[] statLevelRate = {1.1f, 1.05f};
+	
+	private const int STAT_STRENGTH  	= 0;
+	private const int STAT_SPEED		= 1; 
+	
+	public float[] stats 		= {1.0f	, 1.0f};
+	public float[] maxStats 	= {3.0f	, 3.0f};
+	public float[] levelRate 	= {1.05f, 1.01f};
+	public float[] statEffect	= {1.25f, 1.5f};
+	
+	
+	public int maxLevels			= 3;
+	public float[] strengthLevels 	= {10.0f, 25.0f, 50.0f};
+	public float[] speedLevels 		= {12.5f, 27.5f, 55.0f};
+	
+	private float[][] levelThresholds = {null, null};
+	
+	private int[] statLevels = {1, 1};
+	
+	private int jumpsLeft = 1;
+	
+	void Awake()
+	{
+		levelThresholds[STAT_SPEED] 	= speedLevels;
+		levelThresholds[STAT_STRENGTH] 	= strengthLevels;
+		
+		
+		int count;
+		for( count = statLevels.Length - 1; count >= 0; count-- )
+			statLevels[count] = 1;
+		
+		peakTransform = peak.transform;
+	}
+	
+	public GameObject peak;
+	public Vector3[] directionVelocities;
+	
+	private void statAction( int action, float pumpBy )
+	{
+		int actionLevel = statLevels[action];
+		float desiredIntensity = Mathf.Pow(statEffect[action], actionLevel - 1) * (rigidbody.mass / baseMass);
+		
+		Vector3 rockPosition = rock.transform.position;
+		Vector3 toRock = rockPosition - transform.position;
+		
+		bool leftOfRock = Vector3.Distance(peakTransform.position, rockPosition) < Vector3.Distance( peakTransform.position, transform.position );
+		bool belowRock = toRock.y > 0.0f;
+		Debug.Log("StatAction left " + leftOfRock.ToString() + " below rock: " + belowRock.ToString());
+		
+		if( action == STAT_SPEED )
+		{
+		 Debug.Log("Go Left");	
+//			if( !leftOfRock ) 
+//			{
+				pumpMass( pumpBy, 0.1f );
+				Vector3 theForce =  dashForce * desiredIntensity * toRock;
+				if( belowRock && !leftOfRock )
+					theForce = theForce + (Vector3.up * desiredIntensity);
+				rigidbody.AddForce(theForce, ForceMode.Impulse );
+//			}
+		}
+		else
+		{
+			
+		}
+		
+//		Vector3 velocity = directionVelocities[direction];
+		
+//		if( left )
+//			velocity.x *= -1.0f;
+		
+		
+//		stats[action] *= levelRate[action];
+		
+//		float[] statLevelThresholds = levelThresholds[action];
+//		if( statLevelThresholds.Length < actionLevel && stats[action] > statLevelThresholds[actionLevel] )
+//		{ //levelup
+//			statLevels[action]++;
+//		}
+	}
 	
 	private bool GetButton( int direction )
 	{
@@ -48,7 +128,7 @@ public class SisyPhyst : MonoBehaviour {
 		bool rtnVal = directions[direction];
 		if( rtnVal ) //true and not reported yet )
 		{
-			float theTime = Time.time;
+//			float theTime = Time.time;
 			if( directionsDown[direction]  ) //was already down || theTime > cooldownTime[direction]
 				rtnVal = false;
 			else
@@ -121,10 +201,10 @@ public class SisyPhyst : MonoBehaviour {
 			rigidbody.AddForce(-1.0f * (overrun * overrun), -1.0f * overrun, 0.0f, ForceMode.Force);
 		}
 		
-		if( GetButton( LEFT ) )//Input.GetKey( KeyCode.LeftArrow ) )
-		{
-			rigidbody.AddForce( (rock.transform.position - transform.position), ForceMode.Force );
-		}
+//		if( GetButton( LEFT ) )//Input.GetKey( KeyCode.LeftArrow ) )
+//		{
+//			rigidbody.AddForce( (rock.transform.position - transform.position), ForceMode.Force );
+//		}
 	}
 	
 	public float jumpForce = 1.5f;
@@ -135,6 +215,15 @@ public class SisyPhyst : MonoBehaviour {
 		
 //		bool onLeft = transform.position.x < rock.transform.position.x;
 		
+		
+//		if( GetButtonDown( LEFT ) )
+//		{
+//			statAction( STAT_SPEED, 1.0f );
+//		}
+//		else if( GetButtonDown( RIGHT ) )
+//		{
+//			
+//		}
 		
 		if( GetButtonDown( DOWN ) )//( KeyCode.DownArrow ) )
 		{
@@ -148,8 +237,9 @@ public class SisyPhyst : MonoBehaviour {
 		{
 			if( GetButtonDown( LEFT ) )//Input.GetKeyDown( KeyCode.LeftArrow ) )
 			{
-				pumpMass( 8.1f, 0.4f );
-				rigidbody.AddForce( dashForce * (rock.transform.position - transform.position), ForceMode.Impulse );
+//				pumpMass( 8.1f, 0.4f );
+				statAction( STAT_SPEED, 8.1f );
+//				rigidbody.AddForce( dashForce * (rock.transform.position - transform.position), ForceMode.Impulse );
 			} 
 			else if( GetButtonDown( RIGHT ) )//Input.GetKeyDown(KeyCode.RightArrow) )
 			{
@@ -217,6 +307,7 @@ public class SisyPhyst : MonoBehaviour {
         if( collision.gameObject.CompareTag("Rock") )
         {    
             onGround = true;
+			jumpsLeft = statLevels[STAT_SPEED];
             audio.Play();
         }
         //

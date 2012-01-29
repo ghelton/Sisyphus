@@ -71,6 +71,8 @@ public class Initialize : MonoBehaviour {
 //			if( distance < 10.0f )
 //				
 //		}
+		
+//		Material.Lerp(
 	}
 	
 #if UNITY_IPHONE || UNITY_ANDROID
