@@ -1,19 +1,26 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Initialize.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/SisyScripts/RockController.cs">
     <Files>
-      <File FileName="Assets/Initialize.cs" Line="29" Column="5" />
-      <File FileName="Assets/SisyScripts/SisyPhyst.cs" Line="52" Column="70" />
-      <File FileName="Assets/SisyScripts/RockController.cs" Line="56" Column="18" />
-      <File FileName="Assets/SisyScripts/HeightLabel.cs" Line="31" Column="119" />
+      <File FileName="Assets/SisyPhyst/JoysticADC.cs" Line="24" Column="30" />
+      <File FileName="Assets/Initialize.cs" Line="32" Column="3" />
+      <File FileName="Assets/SisyScripts/SisyPhyst.cs" Line="217" Column="40" />
+      <File FileName="Assets/SisyScripts/RockController.cs" Line="95" Column="36" />
+      <File FileName="Assets/SisyScripts/HeightLabel.cs" Line="20" Column="3" />
       <File FileName="Assets/SisyScripts/LoseGUI.cs" Line="30" Column="14" />
-      <File FileName="Assets/SisyPhyst/JoysticADC.cs" Line="29" Column="29" />
       <File FileName="Assets/Plugins/Joystick.js" Line="236" Column="27" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True">
-          <Node name="Assembly-CSharp" expanded="True" />
+          <Node name="Assembly-CSharp" expanded="True">
+            <Node name="Assets" expanded="True">
+              <Node name="SisyPhyst" expanded="True" />
+              <Node name="SisyScripts" expanded="True">
+                <Node name="RockController.cs" selected="True" />
+              </Node>
+            </Node>
+          </Node>
           <Node name="Assembly-CSharp-firstpass" expanded="True" />
           <Node name="Assembly-UnityScript" expanded="True" />
           <Node name="Assembly-UnityScript-Editor-firstpass" expanded="True" />

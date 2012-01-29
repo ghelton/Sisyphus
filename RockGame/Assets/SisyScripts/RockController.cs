@@ -53,16 +53,21 @@ public class RockController : MonoBehaviour {
 		}
 	}
 	
-#if !UNITY_IPHONE
 	void OnCollisionEnter( Collision collider )
 	{
+		
+		
+		if( collider.gameObject.CompareTag("Ground") )
+					audio.Play();
+		
+		
+#if !UNITY_IPHONE && !UNITY_ANDROID
 		
 		ParticleEmitter particles = null;
 		switch( collider.gameObject.tag )
 		{
 			case "Ground":
 					particles = groundCollideParticle;
-					audio.Play();
 //					audio.enabled = true;
 				break;
 				
@@ -84,18 +89,20 @@ public class RockController : MonoBehaviour {
 			
 			ParticleEmitter.Instantiate( particles, contactPoint, contactDirection );
 		}
+#endif
 	}
 	
+#if !UNITY_IPHONE && !UNITY_ANDROID
 	void OnCollisionStay( Collision collision )
 	{
 		if( collision.gameObject.Equals(sissyPhyst) )// sissyPhystStayParticle != null )
 			ParticleEmitter.Instantiate(sissyPhystStayParticle, collision.contacts[0].point, Quaternion.identity);
 	}
-	
-	void OnCollisionExit( Collision collider )
-	{
-		if( collider.gameObject.CompareTag("Ground") )
-			audio.Stop();
-	}
 #endif
+	
+//	void OnCollisionExit( Collision collider )
+//	{
+//		if( collider.gameObject.CompareTag("Ground") )
+//			audio.Stop();
+//	}
 }

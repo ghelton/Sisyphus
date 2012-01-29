@@ -14,7 +14,7 @@ public class Initialize : MonoBehaviour {
 	public float angleDown = 5.0f;
 	
 	private GameObject rock;
-#if UNITY_IPHONE
+#if UNITY_IPHONE || UNITY_ANDROID
 	void Awake ()
 	{
 		if( simpleShader == null )
@@ -28,7 +28,10 @@ public class Initialize : MonoBehaviour {
 				swapToSimpleShadersOnIphone[count].shader = simpleShader;
 			}
 		}
+		
+		RenderSettings.fog = false;
 	}
+	
 #endif
 //	private Vector3 startingPosition;
 	// Use this for initialization
@@ -40,13 +43,6 @@ public class Initialize : MonoBehaviour {
 //		transform.rotation.SetLookRotation( rock.transform.position
 		transform.Rotate(angleDown, 0.0f, 0.0f);
 		
-#if !UNITY_IPHONE
-		GameObject joystick = GameObject.FindGameObjectWithTag("Control");
-		joystick.active = false;
-		Destroy(joystick);
-#else
-		RenderSettings.fog = false;
-#endif
 	}
 	
 	// Update is called once per frame
@@ -77,14 +73,12 @@ public class Initialize : MonoBehaviour {
 //		}
 	}
 	
-#if UNITY_IPHONE
+#if UNITY_IPHONE || UNITY_ANDROID
 	void OnDestroy()
 	{
-		if( simpleShader == null )
-			simpleShader = Shader.Find("Mobile/Diffuse");
 		for( int count = swapToSimpleShadersOnIphone.Length - 1; count >= 0; count-- )
 			swapToSimpleShadersOnIphone[count].shader = oldShaders[count];
-		RenderSettings.fog = false;
+		RenderSettings.fog = true;
 	}
 #endif
 }

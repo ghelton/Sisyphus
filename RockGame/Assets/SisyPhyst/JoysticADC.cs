@@ -12,7 +12,16 @@ public class JoysticADC : MonoBehaviour {
 ////		ohJoy = joystick.GetComponent<Joystick>();
 //	}
 	
-	public float threshold = 0.25f;
+	void Start()
+	{
+#if !UNITY_IPHONE && !UNITY_ANDROID
+//		joystick = GameObject.FindGameObjectWithTag("Control");
+//		joystick.active = false;
+		Destroy(gameObject);
+#endif
+	}
+	
+	public float threshold = 0.2f;
 	void Update()
 	{
 		CheckKeys();

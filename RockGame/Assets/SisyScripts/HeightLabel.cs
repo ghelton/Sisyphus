@@ -25,10 +25,11 @@ public class HeightLabel : MonoBehaviour {
 	private string lastHeightString;
 	// Update is called once per frame
 	void Update () {
-		int newHeight = Mathf.Max(Mathf.RoundToInt( rock.position.y ), RockController.HIGHEST_HEIGHT);
+		int rockPos = Mathf.RoundToInt( rock.position.y );
+		int newHeight = highScore ? Mathf.Max(rockPos, RockController.HIGHEST_HEIGHT) : rockPos;
 		if( newHeight != lastHeight )
 		{
-			heightGuiText.fontStyle = (newHeight > RockController.HIGHEST_HEIGHT) ? FontStyle.BoldAndItalic : FontStyle.Normal;
+			heightGuiText.fontStyle = (highScore && newHeight > RockController.HIGHEST_HEIGHT) ? FontStyle.BoldAndItalic : FontStyle.Normal;
 			heightGuiText.text = baseText + newHeight.ToString();
 		}
 	}

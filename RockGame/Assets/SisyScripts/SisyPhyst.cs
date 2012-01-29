@@ -7,7 +7,7 @@ public class SisyPhyst : MonoBehaviour {
 	public const int DOWN = 0, UP = 1, LEFT = 2, RIGHT = 3;
 	public static bool[] directions = {false, false, false, false};
 	private static bool[] directionsDown = {false, false, false, false};
-	private static float[] cooldownTime = {0.0f, 0.0f, 0.0f, 0.0f};
+//	private static float[] cooldownTime = {0.0f, 0.0f, 0.0f, 0.0f};
 	private static KeyCode[] keycodes = {KeyCode.DownArrow, KeyCode.UpArrow, KeyCode.LeftArrow, KeyCode.RightArrow};
 //	public Vector3 basePunch	= new Vector3( 50.0f, 100.0f);
 //	KeyCode.
@@ -49,12 +49,12 @@ public class SisyPhyst : MonoBehaviour {
 		if( rtnVal ) //true and not reported yet )
 		{
 			float theTime = Time.time;
-			if( directionsDown[direction] || theTime > cooldownTime[direction] ) //was already down
+			if( directionsDown[direction]  ) //was already down || theTime > cooldownTime[direction]
 				rtnVal = false;
 			else
 			{
 				directionsDown[direction] = true; //going down for the first time
-				cooldownTime[direction] = Time.time + 0.267f; //just over one frame ideally
+//				cooldownTime[direction] = Time.time + 0.267f; //just over one frame ideally
 			}
 		}
 		else 
@@ -109,7 +109,7 @@ public class SisyPhyst : MonoBehaviour {
 		}
 		
 		if( GetButton( DOWN ) ) //Input.GetKey( KeyCode.DownArrow ) )
-			pumpMass( 1.002f, 0.07f );
+			pumpMass( 1.015f, 0.07f );
 		
 		if( toRock != Vector3.zero )
 			rigidbody.AddForce( toRock, ForceMode.Force );
@@ -213,15 +213,19 @@ public class SisyPhyst : MonoBehaviour {
 	private bool onGround = false;
 	
 	void OnCollisionEnter(Collision collision)
-	{
-		if( collision.gameObject.CompareTag("Ground") )
-			onGround = true;
-	}
+    {
+        if( collision.gameObject.CompareTag("Rock") )
+        {    
+            onGround = true;
+            audio.Play();
+        }
+        //
+    }
 	
 	
 	void OnCollisionExit(Collision collision)
 	{
-		if( collision.gameObject.CompareTag("Ground") )
+		if( collision.gameObject.CompareTag("Rock") )
 			onGround = false;
 	}
 	
