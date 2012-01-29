@@ -30,7 +30,9 @@ public class SisyPhyst : MonoBehaviour {
 	public float[] statLevelRate = {1.1f, 1.05f};
 	
 	private const int STAT_STRENGTH  	= 0;
-	private const int STAT_SPEED		= 1; 
+	private const int STAT_SPEED		= 1;
+	
+	
 	
 	public float[] stats 		= {1.0f	, 1.0f};
 	public float[] maxStats 	= {3.0f	, 3.0f};
@@ -150,6 +152,8 @@ public class SisyPhyst : MonoBehaviour {
 	private GameObject ground;
 	void Start () {
 		theDude = GameObject.FindGameObjectWithTag("Avatar");
+		if( theDude == null )
+			theDude = transform.GetChild(0).gameObject;
 		
 		baseMass = rigidbody.mass;
 		
@@ -202,7 +206,9 @@ public class SisyPhyst : MonoBehaviour {
 			
 			if( (toRock.x > 0.0f) != facingRight )
 			{
-				iTween.RotateBy(theDude, new Vector3(0.0f, 180.0f, 0.0f), 0.37f);
+//				Debug.Log("Flipping dude");
+				iTween.ScaleBy(theDude, new Vector3(-1.0f, 1.0f, 1.0f), 0.47f);
+//				iTween.RotateAdd(theDude, new Vector3(180.0f, 0.0f), 0.37f);
 				facingRight = !facingRight;
 			}
 		}
@@ -263,7 +269,7 @@ public class SisyPhyst : MonoBehaviour {
 			else if( (Time.time > jumpTime) && GetButtonDown( UP ) )//( KeyCode.UpArrow ) )
 			{
 				jumpTime = Time.time + 0.47f;
-				pumpMass( 105.0f, 0.26f );
+				pumpMass( 250.0f, 0.26f );
 				rigidbody.AddForce( uppercutForce, ForceMode.Impulse );
 			}
 			else
