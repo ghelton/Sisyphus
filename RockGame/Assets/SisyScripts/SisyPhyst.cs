@@ -48,6 +48,8 @@ public class SisyPhyst : MonoBehaviour {
 	
 	private int jumpsLeft = 1;
 	
+	private GameObject theDude;
+	
 	void Awake()
 	{
 		levelThresholds[STAT_SPEED] 	= speedLevels;
@@ -147,6 +149,8 @@ public class SisyPhyst : MonoBehaviour {
 	
 	private GameObject ground;
 	void Start () {
+		theDude = GameObject.FindGameObjectWithTag("Avatar");
+		
 		baseMass = rigidbody.mass;
 		
 		lightIntensity = light.intensity;
@@ -171,6 +175,8 @@ public class SisyPhyst : MonoBehaviour {
 		}
 	}
 	
+	private bool facingRight = true;
+	
 	private Vector3 toRock;
 	private float jumpTime = 0.0f;
 	// Update is called once per frame
@@ -191,8 +197,16 @@ public class SisyPhyst : MonoBehaviour {
 		if( GetButton( DOWN ) ) //Input.GetKey( KeyCode.DownArrow ) )
 			pumpMass( 1.015f, 0.07f );
 		
-		if( toRock != Vector3.zero )
+		if( toRock != Vector3.zero ) {
 			rigidbody.AddForce( toRock, ForceMode.Force );
+			
+			if( (toRock.x > 0.0f) != facingRight )
+			{
+				iTween.RotateBy(theDude, new Vector3(0.0f, 180.0f, 0.0f), 0.37f);
+				facingRight = !facingRight;
+			}
+		}
+		
 		
 		
 		float overrun = rigidbody.transform.position.x - rock.rigidbody.transform.position.x;
