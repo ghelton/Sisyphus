@@ -4,26 +4,45 @@ using UnityEngine;
 public class SpriteSheet : MonoBehaviour 
 {
     public int _uvTieX = 1;
-    public int _uvTieY = 1;
+    public const int _uvTieY = 1;
     public int _fps = 10;
+	
+	public bool loop = false;
     
     private Vector2 _size;
     private Renderer _myRenderer;
     private int _lastIndex = -1;
+	
+	private float animationStart;
     
     void Start () 
     {
+		_lastIndex = -1;
+		animationStart = Time.time;
+		
         _size = new Vector2 (1.0f / _uvTieX , 1.0f / _uvTieY);
         _myRenderer = renderer;
         if(_myRenderer == null)
             enabled = false;
     }
+	
+	void OnEnable()
+	{
+		_lastIndex = -1;
+		animationStart = Time.time;
+	}
+	
+//	void OnDisable()
+//	{
+//		
+//	}
+	
     // Update is called once per frame
     void Update()
     {
         // Calculate index
-        int index = (int)(Time.timeSinceLevelLoad * _fps) % (_uvTieX * _uvTieY);
-        if(index != _lastIndex)
+        int index = (int)((Time.time - animationStart) * _fps) % (_uvTieX * _uvTieY);
+        if( index > _lastIndex || (loop && index != _lastIndex))
         {
             // split into horizontal and vertical index
             int uIndex = index % _uvTieX;

@@ -10,6 +10,7 @@ public class SisyPhyst : MonoBehaviour {
 	public GameObject run;
 	public GameObject magnet;
 	public GameObject down;
+	public GameObject dash;
 	public GameObject[] punches;
 	public GameObject[] upperCut;
 	
@@ -64,7 +65,7 @@ public class SisyPhyst : MonoBehaviour {
 		levelThresholds[STAT_SPEED] 	= speedLevels;
 		levelThresholds[STAT_STRENGTH] 	= strengthLevels;
 		
-		uppercutForce.y *= 0.325f;
+		uppercutForce.y *= 0.025f;
 		int count;
 		for( count = statLevels.Length - 1; count >= 0; count-- )
 			statLevels[count] = 1;
@@ -85,6 +86,12 @@ public class SisyPhyst : MonoBehaviour {
 			lastAnimation.active = false;
 			lastAnimation = animation;
 			lastAnimation.active = true;
+			
+			
+//			Vector3 dudeScale = lastAnimation.transform.localScale;
+//			float scaleMag = Mathf.Abs(dudeScale.x);
+//			dudeScale.x = scaleMag * ((facingRight) ? 1.0f : -1.0f);
+//			lastAnimation.transform.localScale = dudeScale;
 		}
 		else
 			Debug.Log("Attempting to play null animation");
@@ -92,10 +99,11 @@ public class SisyPhyst : MonoBehaviour {
 	
 	
 	private GameObject lastAnimation = null;
-	private void playAnimation( GameObject[] animations )
+	private void playFromAnimations( GameObject[] animations )
 	{
 		int animationKey = Random.Range(0, animations.Length );
 		
+		Debug.Log("Getting random animation #" + animationKey + " from set " + animations[animationKey].ToString() );
 		playAnimation( animations[animationKey] );
 	}
 	
@@ -105,7 +113,7 @@ public class SisyPhyst : MonoBehaviour {
 		float desiredIntensity = Mathf.Pow(statEffect[action], actionLevel - 1) * (rigidbody.mass / baseMass);
 		
 		Vector3 rockPosition = rock.transform.position;
-		Vector3 toRock = rockPosition - transform.position;
+		toRock = rockPosition - transform.position;
 		float rockDistance = toRock.magnitude;
 		toRock.Normalize();
 		
@@ -120,11 +128,12 @@ public class SisyPhyst : MonoBehaviour {
 			case UP:
 				if( discrete ) {
 					rigidbody.AddForce( desiredIntensity * uppercutForce, ForceMode.Impulse );
-					playAnimation( upperCut );
+					playFromAnimations( upperCut );
 				}
 				break;
 				
 			case RIGHT:
+//					Debug.Log("Going right");
 				if( !leftOfRock )
 				{
 					action = STAT_SPEED;
@@ -133,7 +142,12 @@ public class SisyPhyst : MonoBehaviour {
 				else if( discrete )
 				{
 					rigidbody.AddForce( punchForce * desiredIntensity, ForceMode.Impulse );
-					playAnimation( punches );
+					
+//					Debug.Log("Playing punch animation");
+					if( onGround )
+						playFromAnimations( punches );
+					else
+						playAnimation( dash );
 				}
 				
 				break;
@@ -184,19 +198,17 @@ public class SisyPhyst : MonoBehaviour {
 					else if(rigidbody.velocity.x < 0.0f)
 					{
 						if( belowRock  )
-							toRock = (Vector3.up * rigidbody.mass * jumpForce);
+							toRock = (Vector3.up * desiredIntensity * jumpForce);
 						
-						toRock += Vector3.left * rigidbody.mass * leftForce;
+						toRock += Vector3.left * desiredIntensity * leftForce;
 					}
 				}
 				else if( !onGround )
 				{
-					toRock.Normalize();
 					toRock *= (rigidbody.mass + rock.rigidbody.mass);
 				}
 				else
 				{
-					toRock.Normalize();
 					toRock *= walkForceMult;
 				}
 				
@@ -264,6 +276,11 @@ public class SisyPhyst : MonoBehaviour {
 			upperCut[count].active = false;
 		
 		lastAnimation = run;
+		down.active = false;
+        magnet.active = false;
+		dash.active = false;
+		
+//		run.GetComponent<SpriteSheet>().loop = true;
 		
 		projectedMass = rigidbody.mass;
 		
@@ -321,16 +338,6 @@ public class SisyPhyst : MonoBehaviour {
 		
 		if( toRock != Vector3.zero ) {
 			rigidbody.AddForce( toRock, ForceMode.Force );
-			
-			if( (toRock.x >= 0.0f) != facingRight )
-			{
-//				Debug.Log("Flipping dude");
-				facingRight = !facingRight;
-				Vector3 dudeScale = theDude.transform.localScale;
-				dudeScale.x *= -1.0f;
-				
-				iTween.ScaleTo(theDude, dudeScale, 0.47f);
-			}
 		}
 		
 		
@@ -383,6 +390,21 @@ public class SisyPhyst : MonoBehaviour {
 				pumpMass( 1.2f, 0.26f );
 				statAction( STAT_STRENGTH, UP, true );
 			}
+			else
+			{
+//				Debug.Log("Check flip");
+//				bool leftOfRock = Vector3.Distance(peakTransform.position, rock.transform.position) < Vector3.Distance( peakTransform.position, transform.position );
+//				if( leftOfRock != facingRight )
+//				{
+//					Debug.Log("Flipping dude");
+//					facingRight = !facingRight;
+//					Vector3 dudeScale = theDude.transform.localScale;
+//					float scaleMag = Mathf.Abs(dudeScale.x);
+//					dudeScale.x = scaleMag * ((facingRight) ? 1.0f : -1.0f);
+//					
+//					iTween.ScaleTo(lastAnimation, dudeScale, 0.47f);
+//				}
+			}
 		}
 		
 		float massOffset = rigidbody.mass / baseMass;
@@ -404,12 +426,22 @@ public class SisyPhyst : MonoBehaviour {
 	
 	private bool onGround = false;
 	
+	public float impactThreshold = 0.5f;
 	void OnCollisionEnter(Collision collision)
     {
         if( collision.gameObject.CompareTag("Rock") )
         {    
 			jumpsLeft = statLevels[STAT_SPEED];
-            audio.Play();
+			
+			float velocity = Mathf.Sqrt(collision.relativeVelocity.magnitude);
+			
+			
+			if( velocity > impactThreshold )
+			{
+				Debug.Log("Shaking camera");
+				iTween.ShakeRotation( Camera.mainCamera.gameObject, (new Vector3( 0.0135f, 0.0135f, 0.00167f )) * Mathf.Min(150.0f, (velocity * velocity * velocity)), 0.37f * Mathf.Log(velocity) );
+	            audio.Play();
+			}
         }
 		else if( collision.gameObject.CompareTag("Ground") )
 		{
@@ -426,7 +458,8 @@ public class SisyPhyst : MonoBehaviour {
 		if( collision.gameObject.CompareTag("Ground") ) 
 		{
 			onGround = false;
-//			playAnimation( up );
+			if( Time.time > jumpTime )
+				playAnimation( upperCut[0] );
 		}
 	}
 	
