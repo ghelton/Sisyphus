@@ -1,0 +1,11 @@
+*~
+*#
+.DS_Store
+XCode/
+Unity/Temp/
+Unity/Library/
+*Assembly-*
+Unity/Unity.userprefs
+*.sln
+WebBrowserBuild/
+*Mystery?
